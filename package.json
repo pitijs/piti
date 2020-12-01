@@ -1,11 +1,8 @@
 {
-  "name": "rx-console",
-  "version": "0.0.1",
-  "description": "Rx Console is a small cli framework developed with Typescript.",
+  "name": "konsolejs",
+  "version": "0.0.3",
+  "description": "KonsoleJS is a small cli framework developed with Typescript.",
   "main": "./dist/index.js",
-  "bin": {
-    "rxc": "./dist/cli.js"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"

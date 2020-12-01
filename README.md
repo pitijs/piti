@@ -1,5 +1,7 @@
 # Konsole JS
 
+[![npm version](https://badge.fury.io/js/konsolejs.svg)](https://badge.fury.io/js/konsolejs)
+
 **KonsoleJS** is a small cli framework developed with Typescript. You can develop reactive applications by [Redux](https://redux.js.org/) and [RxJS](https://www.learnrxjs.io/) in Konsole JS.
 
 **Install**
@@ -38,7 +40,7 @@ export default HelloCommand;
 
 ```ts
 import Konsole from 'konsolejs';
-import './login';
+import './hello';
 
 Konsole.run({
   scriptName: 'console-app',
@@ -253,7 +255,8 @@ class CreateUserCommand {
     },
   })
   fetchUsersFulfilled(result) {
-    console.log('The user already created!', result);
+    console.log(result);
+    // [{name: 'Thor', isVip: true}]
   }
 
   handle() {
