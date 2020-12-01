@@ -13,21 +13,21 @@ process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
 
 let initialized = false;
 
-class RxConsole {
+class Konsole {
   static builder: CommandBuilder;
 
   static init() {
     if (initialized) return;
-    RxConsole.builder = new CommandBuilder(container);
-    container.singleton(BUILDER_KEY, RxConsole.builder);
+    Konsole.builder = new CommandBuilder(container);
+    container.singleton(BUILDER_KEY, Konsole.builder);
     container.create(SUBSCRIBERS_KEY);
     initialized = true;
   }
 
   static async run(options: Options) {
     try {
-      RxConsole.createContainers(options);
-      RxConsole.builder.run();
+      Konsole.createContainers(options);
+      Konsole.builder.run();
     } catch (e) {
       console.log(e);
     }
@@ -46,11 +46,11 @@ class RxConsole {
   }
 }
 
-RxConsole.init();
+Konsole.init();
 
 export const dispatch = internalExports.dispatch;
 export const getState = internalExports.getState;
 export const Subscribe = internalExports.Subscribe;
 export const Command = internalExports.Command;
 
-export default RxConsole;
+export default Konsole;

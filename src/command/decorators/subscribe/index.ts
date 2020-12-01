@@ -19,7 +19,8 @@ const subscribe = (value: SubscribeType) => {
       subscribers = _subscribers;
     } else if (isPlainObject(value)) {
       action = value.action;
-      subject = value.observer(new Subject());
+      subject = new Subject();
+      subject = value.observer(subject);
     }
 
     if (action && subject) {

@@ -1,8 +1,7 @@
-import isPromise from "is-promise";
 import isPlainObject from "lodash.isplainobject";
 
-export const extractDefaultModule = (module: any): any => {
-  // if (isPromise(module)) module = await module;
-  if (isPlainObject(module) && module.default) module = module.default;
-  return module;
-};
+export const createClass = (constructor: Function, args: any[]) => {
+  const newObject = Object.create(constructor.prototype);
+  const result = constructor.apply(newObject, args);
+  return isPlainObject(result) ? result : newObject;
+}

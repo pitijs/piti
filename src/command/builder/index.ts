@@ -1,10 +1,9 @@
 import yargs, { Argv } from 'yargs';
 import { red, yellow } from 'chalk';
-import isPlainObject from 'lodash.isplainobject';
 import isFunction from 'lodash.isfunction';
 import ICommand from '../types/command';
 import { CommandObject, CommandType } from '../../utils/types';
-import { extractDefaultModule } from '../../utils/helpers';
+import { createClass } from '../../utils/helpers';
 import { ServiceContainer } from '../../services';
 import { COMMANDS_KEY, COMMAND_BUILDER_KEY, SCRIPT_NAME } from '../../config/constants';
 
@@ -14,33 +13,32 @@ class CommandBuilder {
   public add(command: CommandType) {
     const commandBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
     let inject: [] = [];
-
-    if (isPlainObject(command)) {
-      let { command: _command, inject: _inject = [] } = command as CommandObject;
-      command = _command as any;
-      inject = _inject as [];
-    }
-
-    command = extractDefaultModule(command);
+    const { command: _command, inject: _inject = [] } = command as CommandObject;
+    command = _command as any;
+    inject = _inject as [];
 
     if (!isFunction(command)) throw red(`Incorret command -> ${command}.`);
 
     const CommandClass = command as any;
-    const commandInstance = new CommandClass(commandBuilder) as ICommand;
-    const { name: cmd, description, handle } = commandInstance;
+    const commandInstance = createClass(CommandClass, inject) as ICommand;
+    const { name: cmd, description, before, handle } = commandInstance;
 
     if (!isFunction(handle))
       throw new Error(red(`Missing the handle() method at ${yellow(CommandClass.name)} class.`));
 
-    const commandHandler = async () => {
+    const commandBuilderHandler = (builder: Argv) => {
+      if (isFunction(before)) before(builder);
+    };
+
+    const commandHandler = (argv: Argv) => {
       try {
-        await handle.apply(commandInstance, inject);
+        handle.apply(commandInstance, [argv] as any);
       } catch (e) {
         console.error(e);
       }
     };
 
-    commandBuilder.command(cmd, description, commandHandler);
+    commandBuilder.command(cmd, description, commandBuilderHandler, commandHandler);
   }
 
   public run() {

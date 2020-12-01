@@ -1,11 +1,11 @@
-import { SubscriptionLike } from 'rxjs';
+import { Observable, Subject, SubscriptionLike } from 'rxjs';
 import { SubjectsCombine } from 'src/utils/types';
 
 export type SubscribeType =
   | string
   | {
       action: string;
-      observer: (observer: SubjectsCombine<any>) => SubjectsCombine<any>;
+      observer: (subject: Subject<any>) => Observable<any>;
     };
 
 export type SubscribeItem = {
