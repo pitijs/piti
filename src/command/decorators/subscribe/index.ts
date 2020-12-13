@@ -3,10 +3,11 @@ import isString from 'lodash.isstring';
 import isPlainObject from 'lodash.isplainobject';
 import { container, ServiceContainer } from '../../../services';
 import { SubscribeItem, SubscribeType } from './types';
+import { SUBSCRIBERS_KEY } from '../../../config/constants';
 
 const subscribe = (value: SubscribeType) => {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    const subscriberContainer = container.get<ServiceContainer>('fw.subscribers');
+    const subscriberContainer = container.get<ServiceContainer>(SUBSCRIBERS_KEY);
     let subscribers = {} as { [prop: string]: SubscriptionLike },
       subject,
       action;

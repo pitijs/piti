@@ -30,7 +30,7 @@ class ServiceContainer {
 
   has = (key: string): any => this.container.has(key);
 
-  remove = (key: string): any => this.container.delete(key);
+  remove = (key: string): boolean => this.container.delete(key);
 
   create = (name: string): ServiceContainer => {
     this.singleton(name, new ServiceContainer());
@@ -39,4 +39,5 @@ class ServiceContainer {
 }
 
 export { ServiceContainer };
+
 export default new ServiceContainer();

@@ -1,6 +1,6 @@
 {
   "name": "konsolejs",
-  "version": "0.0.3-beta.1",
+  "version": "0.0.3-beta.2",
   "description": "KonsoleJS is a small cli framework developed with Typescript.",
   "main": "./dist/index.js",
   "scripts": {

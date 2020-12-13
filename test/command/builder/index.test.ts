@@ -3,7 +3,7 @@ import { container, ServiceContainer } from '../../../src/services';
 import { Argv } from 'yargs';
 import CommandBuilder from '../../../src/command/builder';
 
-describe('💉 Command Builder Tests', () => {
+describe('💉 Tests of Command Builder', () => {
   let _container: ServiceContainer, yargsBuilder: Argv, commandBuilder: CommandBuilder;
   const scriptName = 'test-script';
   beforeAll(() => {
@@ -13,6 +13,8 @@ describe('💉 Command Builder Tests', () => {
     commandBuilder.run();
     yargsBuilder = _container.get<Argv>(COMMAND_BUILDER_KEY);
   });
+
+  afterAll(() => container.remove('test'));
 
   describe('run()', () => {
     test('Create script', () => {
