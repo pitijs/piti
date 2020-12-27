@@ -13,21 +13,21 @@ process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
 
 let initialized = false;
 
-class Konsole {
+class Piti {
   static builder: CommandBuilder;
 
   static init() {
     if (initialized) return;
-    Konsole.builder = new CommandBuilder(container);
-    container.singleton(BUILDER_KEY, Konsole.builder);
+    Piti.builder = new CommandBuilder(container);
+    container.singleton(BUILDER_KEY, Piti.builder);
     container.create(SUBSCRIBERS_KEY);
     initialized = true;
   }
 
   static async run(options: Options) {
     try {
-      Konsole.createContainers(options);
-      Konsole.builder.run();
+      Piti.createContainers(options);
+      Piti.builder.run();
     } catch (e) {
       console.log(e);
     }
@@ -46,11 +46,11 @@ class Konsole {
   }
 }
 
-Konsole.init();
+Piti.init();
 
 export const dispatch = internalExports.dispatch;
 export const getState = internalExports.getState;
 export const Subscribe = internalExports.Subscribe;
 export const Command = internalExports.Command;
 
-export default Konsole;
+export default Piti;

@@ -1,19 +1,19 @@
-# Konsole JS
+# Piti
 
-[![npm version](https://badge.fury.io/js/konsolejs.svg)](https://badge.fury.io/js/konsolejs)
+[![npm version](https://badge.fury.io/js/piti.svg)](https://badge.fury.io/js/piti)
 
-**KonsoleJS** is a small cli framework developed with Typescript. You can develop reactive applications by [Redux](https://redux.js.org/) and [RxJS](https://www.learnrxjs.io/) in Konsole JS.
+**Piti** is a small cli framework developed with Typescript. You can develop reactive applications by [Redux](https://redux.js.org/) and [RxJS](https://www.learnrxjs.io/) in Piti.
 
 **Install**
 
 ```sh
-$ yarn add konsolejs
+$ yarn add piti
 ```
 
 or
 
 ```sh
-$ npm i konsolejs --save
+$ npm i piti --save
 ```
 
 ## Quick Start
@@ -21,7 +21,7 @@ $ npm i konsolejs --save
 **hello.ts**
 
 ```ts
-import { Command } from 'konsolejs';
+import { Command } from 'piti';
 
 @Command()
 class HelloCommand {
@@ -39,10 +39,10 @@ export default HelloCommand;
 **index.ts**
 
 ```ts
-import Konsole from 'konsolejs';
+import Piti from 'piti';
 import './hello';
 
-Konsole.run({
+Piti.run({
   scriptName: 'console-app',
 });
 ```
@@ -55,12 +55,12 @@ $ npx ts-node index.ts hello
 
 ## Command arguments
 
-Konsole JS uses [yargs](http://yargs.js.org/) for command arguments. Created command builder will be inject to command class constructor. So you can be detail your command arguments.
+Piti uses [yargs](http://yargs.js.org/) for command arguments. Created command builder will be inject to command class constructor. So you can be detail your command arguments.
 
 **Example:**
 
 ```ts
-import { Command } from 'konsolejs';
+import { Command } from 'piti';
 import { Argv, Arguments } from 'yargs';
 
 @Command()
@@ -113,7 +113,7 @@ class LoginCommand {
 
 ## Use Redux
 
-You can manage state of objects using pure ReduxJS library. For this first of all, you should be configure the redux then pass the store to KonsoleJS.
+You can manage state of objects using pure ReduxJS library. For this first of all, you should be configure the redux then pass the store to Piti.
 
 **Install Redux:**
 
@@ -124,12 +124,12 @@ $ yarn add redux
 **Create store:**
 
 ```ts
-import Konsole from 'konsolejs';
+import Piti from 'piti';
 import { createStore } from 'redux';
 
 const store = createStore(reducers);
 
-Konsole.run({
+Piti.run({
   scriptName: 'console-app',
   store,
 });
@@ -193,7 +193,7 @@ const userReducer = (state = initialState, action) => {
 **Command**
 
 ```ts
-import { Command, Subscribe, dispatch, getState } from 'konsolejs';
+import { Command, Subscribe, dispatch, getState } from 'piti';
 
 @Command()
 class CreateUserCommand {
