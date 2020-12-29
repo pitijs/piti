@@ -1,17 +1,28 @@
 import yargs, { Argv } from 'yargs';
 import isFunction from 'lodash.isfunction';
+import { List } from 'immutable';
 import ICommand from '../types/command';
 import { CommandObject, CommandType } from '../../utils/types';
 import { createClass, validateCommand } from '../../utils/helpers';
 import { ServiceContainer } from '../../services';
-import { COMMANDS, COMMANDS_KEY, COMMAND_BUILDER_KEY, SCRIPT_NAME } from '../../config/constants';
+import {
+  BLUEPRINTS_KEY,
+  COMMAND_BUILDER_KEY,
+  COMMAND_CONTAINER_KEY,
+  SCRIPT_NAME,
+} from '../../config/constants';
 import { CommandBlueprint } from '../types';
+import { CommandContainer } from '..';
 
 class CommandBuilder {
-  constructor(public container: ServiceContainer) {}
+  private commandContainer: CommandContainer;
+
+  constructor(public container: ServiceContainer) {
+    this.commandContainer = container.get<CommandContainer>(COMMAND_CONTAINER_KEY);
+  }
 
   public add(command: CommandType): Argv {
-    const commandBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
+    const yargsBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
     let inject: [] = [];
     const { command: _command, inject: _inject = [] } = command as CommandObject;
     command = _command as any;
@@ -36,35 +47,33 @@ class CommandBuilder {
       }
     };
 
-    return commandBuilder.command(cmd, description, commandBuilderHandler, commandHandler);
+    return yargsBuilder.command(cmd, description, commandBuilderHandler, commandHandler);
   }
 
   public run() {
     this.createScript();
     this.addCommands();
-    this.container.add(COMMANDS, []);
     const commandBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
     commandBuilder.help().argv;
   }
 
   public count(): number {
-    return this.getBlueprints().length;
+    return this.getBlueprints().size;
   }
 
-  public getBlueprints(): Array<CommandBlueprint> {
-    return this.container.get(COMMANDS, []);
+  public getBlueprints(): List<CommandBlueprint> {
+    return this.container.get(BLUEPRINTS_KEY, List([]));
   }
 
   public saveBlueprint(name: string, description: string): void {
     if (this.hasBlueprint(name)) return;
-    const blueprints = this.getBlueprints();
-    blueprints.push({ name, description });
-    this.container.add(COMMANDS, blueprints);
+    const newList = this.getBlueprints().push({ name, description });
+    this.container.add(BLUEPRINTS_KEY, newList);
   }
 
-  public hasBlueprint(name: string) {
-    const blueprints = this.getBlueprints();
-    return !!blueprints.find(({ name: cmd }) => cmd === name);
+  public hasBlueprint(name: string): boolean {
+    const index = this.getBlueprints().findIndex((blueprint) => blueprint.name === name);
+    return index > -1;
   }
 
   private createScript() {
@@ -74,9 +83,8 @@ class CommandBuilder {
   }
 
   private addCommands() {
-    const commands = this.container.get<CommandType[]>(COMMANDS_KEY, []);
-
-    for (const command of commands) {
+    const commands = this.commandContainer.fetch();
+    for (const command of commands.toArray()) {
       this.add(command);
     }
   }

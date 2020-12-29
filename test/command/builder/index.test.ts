@@ -1,7 +1,12 @@
-import { COMMAND_BUILDER_KEY, SCRIPT_NAME } from '../../../src/config/constants';
+import {
+  COMMAND_BUILDER_KEY,
+  COMMAND_CONTAINER_KEY,
+  SCRIPT_NAME,
+} from '../../../src/config/constants';
 import { container, ServiceContainer } from '../../../src/services';
 import { Argv } from 'yargs';
 import CommandBuilder from '../../../src/command/builder';
+import { CommandContainer } from '../../../src/command';
 
 describe('💉 Tests of Command Builder', () => {
   let _container: ServiceContainer, yargsBuilder: Argv, commandBuilder: CommandBuilder;
@@ -9,6 +14,10 @@ describe('💉 Tests of Command Builder', () => {
   beforeAll(() => {
     _container = container.create('test');
     _container.add(SCRIPT_NAME, scriptName);
+
+    const commandContainer = new CommandContainer();
+    _container.add(COMMAND_CONTAINER_KEY, commandContainer);
+
     commandBuilder = new CommandBuilder(_container);
     commandBuilder.run();
     yargsBuilder = _container.get<Argv>(COMMAND_BUILDER_KEY);
@@ -122,9 +131,9 @@ describe('💉 Tests of Command Builder', () => {
   describe('getBlueprints()', () => {
     test('Get all blueprints', () => {
       let has = (bp: any[]) => bp.find(({ name }) => name === 'test-6');
-      expect(has(commandBuilder.getBlueprints())).toEqual(undefined);
+      expect(has(commandBuilder.getBlueprints().toArray())).toEqual(undefined);
       commandBuilder.saveBlueprint('test-6', 'description');
-      expect(has(commandBuilder.getBlueprints())).toEqual({
+      expect(has(commandBuilder.getBlueprints().toArray())).toEqual({
         name: 'test-6',
         description: 'description',
       });

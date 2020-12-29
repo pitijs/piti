@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { CommandBuilder } from './command';
+import { CommandBuilder, CommandContainer } from './command';
 import { container, Redux } from './services';
 import { Options } from './utils/types';
-import { BUILDER_KEY, SCRIPT_NAME, STORE_KEY, SUBSCRIBERS_KEY } from './config/constants';
+import { BUILDER_KEY, COMMAND_CONTAINER_KEY, SCRIPT_NAME, STORE_KEY, SUBSCRIBERS_KEY } from './config/constants';
 import * as internalExports from './exports';
 export type { ICommand } from './exports';
 
@@ -18,9 +18,14 @@ class Piti {
 
   static init() {
     if (initialized) return;
-    Piti.builder = new CommandBuilder(container);
-    container.singleton(BUILDER_KEY, Piti.builder);
+    const commandContainer = new CommandContainer;
+    container.add(COMMAND_CONTAINER_KEY, commandContainer);
+
+    const commandBuilder = new CommandBuilder(container);
+    container.singleton(BUILDER_KEY, commandBuilder);
+
     container.create(SUBSCRIBERS_KEY);
+    Piti.builder = commandBuilder;
     initialized = true;
   }
 

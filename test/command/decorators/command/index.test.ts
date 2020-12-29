@@ -1,15 +1,21 @@
+import { List } from 'immutable';
+import { CommandContainer } from '../../../../src/command';
 import command from '../../../../src/command/decorators/command';
-import { COMMANDS_KEY } from '../../../../src/config/constants';
+import { COMMANDS_KEY, COMMAND_CONTAINER_KEY } from '../../../../src/config/constants';
 import { container } from '../../../../src/services';
-import { CommandType } from '../../../../src/utils/types';
 
-const hasCommand = (name: string) =>
-  container
-    .get<CommandType[]>(COMMANDS_KEY, [])
-    .findIndex(({ command }: any) => command.getMockName() === name) !== -1;
+const commandContainer = new CommandContainer();
+const hasCommand = (name: string) => {
+  return (
+    commandContainer.fetch().findIndex(({ command }: any) => command.getMockName() === name) !== -1
+  );
+};
 
 describe('💉 Tests of Command Decorator', () => {
-  afterAll(() => container.add(COMMANDS_KEY, []));
+  afterAll(() => container.add(COMMANDS_KEY, List([])));
+  beforeEach(() => {
+    container.add(COMMAND_CONTAINER_KEY, commandContainer);
+  });
 
   test('Add command', () => {
     expect(hasCommand('test-1')).toEqual(false);
@@ -35,8 +41,8 @@ describe('💉 Tests of Command Decorator', () => {
     })(TestCommand);
     expect(hasCommand('test-2')).toEqual(true);
 
-    const mockCommand = container
-      .get<CommandType[]>(COMMANDS_KEY, [])
+    const mockCommand = commandContainer
+      .fetch()
       .find(({ command }: any) => command.getMockName() === 'test-2');
 
     expect(mockCommand.inject[0]).toEqual(depFunction);
