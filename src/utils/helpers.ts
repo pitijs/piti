@@ -10,11 +10,7 @@ export const createClass = (constructor: Function, args: any[]) => {
 };
 
 export const validateCommand = (command: ICommand) => {
-  if (!command.name) {
-    return red(`Missing command ${yellow('name')} property in command class.`);
-  } else if (!command.description) {
-    return red(`Missing command ${yellow('description')} property in command class.`);
-  } else if (!command.handle || !isFunction(command.handle)) {
+  if (!command.handle || !isFunction(command.handle)) {
     return red(`Missing ${yellow('handle()')} method in command class`);
   }
 };

@@ -1,8 +1,9 @@
 import yargs, { Argv } from 'yargs';
+import { red, yellow } from 'chalk';
 import isFunction from 'lodash.isfunction';
 import { List } from 'immutable';
 import ICommand from '../types/command';
-import { CommandObject, CommandType } from '../../utils/types';
+import { CommandObject } from '../../utils/types';
 import { createClass, validateCommand } from '../../utils/helpers';
 import { ServiceContainer } from '../../services';
 import {
@@ -21,20 +22,20 @@ class CommandBuilder {
     this.commandContainer = container.get<CommandContainer>(COMMAND_CONTAINER_KEY);
   }
 
-  public add(command: CommandType): Argv {
-    const yargsBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
-    let inject: [] = [];
-    const { command: _command, inject: _inject = [] } = command as CommandObject;
-    command = _command as any;
-    inject = _inject as [];
-
+  public add(commandObject: CommandObject): Argv {
+    const { name: cmd, description, command, inject = [] } = commandObject;
     const CommandClass = command as any;
     const commandInstance = createClass(CommandClass, inject) as ICommand;
     const hasError = validateCommand(commandInstance);
 
     if (hasError) throw new Error(hasError);
 
-    const { name: cmd, description, before, handle } = commandInstance;
+    const yargsBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
+    const { before, handle } = commandInstance;
+
+    if (this.hasBlueprint(cmd)) {
+      throw new Error(red(`The ${yellow(cmd)} command already added.`));
+    }
 
     this.saveBlueprint(cmd, description);
 

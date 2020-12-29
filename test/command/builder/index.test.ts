@@ -11,7 +11,8 @@ import { CommandContainer } from '../../../src/command';
 describe('💉 Tests of Command Builder', () => {
   let _container: ServiceContainer, yargsBuilder: Argv, commandBuilder: CommandBuilder;
   const scriptName = 'test-script';
-  beforeAll(() => {
+
+  beforeEach(() => {
     _container = container.create('test');
     _container.add(SCRIPT_NAME, scriptName);
 
@@ -23,7 +24,7 @@ describe('💉 Tests of Command Builder', () => {
     yargsBuilder = _container.get<Argv>(COMMAND_BUILDER_KEY);
   });
 
-  afterAll(() => container.remove('test'));
+  afterEach(() => container.remove('test'));
 
   describe('run()', () => {
     test('Create script', () => {
@@ -33,13 +34,14 @@ describe('💉 Tests of Command Builder', () => {
     test('Add Commands', () => {
       const mockCommand = jest.fn();
       mockCommand.prototype.handle = () => {};
-      mockCommand.prototype.name = 'test';
-      mockCommand.prototype.description = 'description';
 
       commandBuilder.add({
         command: mockCommand,
         inject: [],
+        name: 'test',
+        description: 'description',
       });
+      expect(commandBuilder.count()).toEqual(1);
     });
   });
 
@@ -47,15 +49,38 @@ describe('💉 Tests of Command Builder', () => {
     test('add command successfuly', () => {
       const mockCommand = jest.fn();
       mockCommand.prototype.handle = () => {};
-      mockCommand.prototype.name = 'test';
-      mockCommand.prototype.description = 'description';
 
       const result = commandBuilder.add({
         command: mockCommand,
         inject: [],
+        name: 'test',
+        description: 'description',
       });
 
       expect(result).toEqual(yargsBuilder);
+    });
+
+    test('The same command should not be added', () => {
+      const mockCommand = jest.fn();
+      mockCommand.prototype.handle = () => {};
+
+      commandBuilder.add({
+        command: mockCommand,
+        inject: [],
+        name: 'test',
+        description: 'description',
+      });
+      expect(commandBuilder.count()).toEqual(1);
+
+      function addCommand() {
+        commandBuilder.add({
+          command: mockCommand,
+          inject: [],
+          name: 'test',
+          description: 'description',
+        });
+      }
+      expect(addCommand).toThrow(/The .+(test).+ command already added/);
     });
 
     test('Catch the exceptions when added anything instead of function as command', () => {
@@ -63,6 +88,8 @@ describe('💉 Tests of Command Builder', () => {
         commandBuilder.add({
           command: '' as any,
           inject: [],
+          name: 'test',
+          description: 'description',
         });
       }
       expect(addCommand).toThrow(/Object prototype may/);
@@ -74,14 +101,10 @@ describe('💉 Tests of Command Builder', () => {
         commandBuilder.add({
           command: mockCommand,
           inject: [],
+          name: 'test',
+          description: 'description',
         });
       }
-      expect(addCommand).toThrow(/Missing command .+(name).+ property in command class/);
-
-      mockCommand.prototype.name = 'login';
-      expect(addCommand).toThrow(/Missing command .+(description).+ property in command class/);
-
-      mockCommand.prototype.description = 'Login to api';
       expect(addCommand).toThrow(/Missing .+(handle()).+ method in command class/);
 
       mockCommand.prototype.handle = function () {};
@@ -91,16 +114,16 @@ describe('💉 Tests of Command Builder', () => {
 
   describe('count()', () => {
     test('Get total commands count', () => {
-      expect(commandBuilder.count()).toEqual(2);
+      expect(commandBuilder.count()).toEqual(0);
       const mockCommand = jest.fn();
       mockCommand.prototype.handle = () => {};
-      mockCommand.prototype.name = 'test-2';
-      mockCommand.prototype.description = 'any command description';
       commandBuilder.add({
         command: mockCommand,
         inject: [],
+        name: 'test-2',
+        description: 'any command description',
       });
-      expect(commandBuilder.count()).toEqual(3);
+      expect(commandBuilder.count()).toEqual(1);
     });
   });
 
@@ -111,12 +134,11 @@ describe('💉 Tests of Command Builder', () => {
       commandBuilder.saveBlueprint('test-3', 'description');
       expect(has()).toEqual({ name: 'test-3', description: 'description' });
     });
-
     test('Not add duplicated command', () => {
       commandBuilder.saveBlueprint('test-4', 'description');
-      expect(commandBuilder.count()).toEqual(5);
+      expect(commandBuilder.count()).toEqual(1);
       commandBuilder.saveBlueprint('test-4', 'description');
-      expect(commandBuilder.count()).toEqual(5);
+      expect(commandBuilder.count()).toEqual(1);
     });
   });
 
