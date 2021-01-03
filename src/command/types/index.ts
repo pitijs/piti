@@ -1,4 +1,5 @@
 export type CommandBlueprint = {
+  id: string;
   name: string;
   description: string;
 };

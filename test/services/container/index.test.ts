@@ -4,7 +4,7 @@ describe('💉 Tests of service container', () => {
   afterAll(() => {
     container.remove('myObject2');
     container.remove('addToCart');
-    container.remove('items');1
+    container.remove('items');
   });
 
   describe('get()', () => {
@@ -79,5 +79,12 @@ describe('💉 Tests of service container', () => {
       expect(container.has('addToCart')).toEqual(false);
       expect(container.get('addToCart')).toEqual(undefined);
     });
+  });
+
+  describe('removeAll()', () => {
+    container.add('newItem', true);
+    expect(container.get('newItem')).toEqual(true);
+    container.removeAll();
+    expect(container.get('newItem')).toEqual(undefined);
   });
 });

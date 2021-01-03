@@ -21,7 +21,13 @@ describe('💉 Tests of Command Decorator', () => {
     expect(hasCommand('test-1')).toEqual(false);
     const TestCommand = jest.fn();
     TestCommand.mockName('test-1');
-    command()(TestCommand);
+
+    command({
+      name: 'test-1',
+      description: 'Test 1 description',
+      inject: [1,2,3,4]
+    })(TestCommand);
+
     expect(hasCommand('test-1')).toEqual(true);
   });
 
@@ -37,6 +43,8 @@ describe('💉 Tests of Command Decorator', () => {
     const depArray = [1];
     const depPlainObject = { name: 'test-2' };
     command({
+      name: 'test-2',
+      description: 'Test 2 description',
       inject: [depFunction, depNumber, depString, depBoolean, depArray, depPlainObject],
     })(TestCommand);
     expect(hasCommand('test-2')).toEqual(true);
@@ -51,5 +59,18 @@ describe('💉 Tests of Command Decorator', () => {
     expect(mockCommand.inject[3]).toEqual(true);
     expect(mockCommand.inject[4]).toEqual(depArray);
     expect(mockCommand.inject[5]).toEqual(depPlainObject);
+  });
+
+  test('Add command meta data into command class with a global symbol', () => {
+    const TestCommand = jest.fn();
+    TestCommand.mockName('test-3');
+    const meta = {
+      name: 'test-3',
+      description: 'Test 3 description',
+      inject: [1, 2, 3]
+    };
+
+    command(meta)(TestCommand);
+    expect(TestCommand[Symbol.for('command.meta')]).toEqual(meta);
   });
 });

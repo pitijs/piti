@@ -32,9 +32,12 @@ class Piti {
   static async run(options: Options) {
     try {
       Piti.createContainers(options);
-      Piti.builder.run();
+      const { commands } = options;
+      Piti.builder.run(commands);
     } catch (e) {
       console.log(e);
+    } finally {
+
     }
   }
 

@@ -36,6 +36,8 @@ class ServiceContainer {
     this.singleton(name, new ServiceContainer());
     return this.get(name);
   };
+
+  removeAll = () => this.container.forEach((_, key: any) => this.remove(key));
 }
 
 export { ServiceContainer };

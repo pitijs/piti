@@ -23,12 +23,12 @@ $ npm i piti --save
 ```ts
 import { Command } from 'piti';
 
-@Command()
+@Command({
+  name: 'hello',
+  description: 'The hello world command',
+})
 class HelloCommand {
-  name = 'hello';
-  description = 'The hello world command';
-
-  handle() {
+  handler() {
     console.log('Hello World!');
   }
 }
@@ -40,10 +40,11 @@ export default HelloCommand;
 
 ```ts
 import Piti from 'piti';
-import './hello';
+import HelloCommand from './hello';
 
 Piti.run({
   scriptName: 'console-app',
+  commands: [HelloCommand],
 });
 ```
 
@@ -63,12 +64,12 @@ Piti uses [yargs](http://yargs.js.org/) for command arguments. Created command b
 import { Command } from 'piti';
 import { Argv, Arguments } from 'yargs';
 
-@Command()
+@Command({
+  name: 'login',
+  description: 'Login to platform',
+})
 class LoginCommand {
-  name = 'login';
-  description = 'Loging to platformm';
-
-  before(builder: Argv) {
+  builder(yargs: Argv) {
     builder
       .positional('username', {
         type: 'string',
@@ -80,7 +81,7 @@ class LoginCommand {
       });
   }
 
-  handle(args: Arguments) {
+  handler(args: Arguments) {
     console.log('username:', args.username, 'password:', args.password);
   }
 }
@@ -102,6 +103,7 @@ With the `@Command` decorator you can inject parameters into the command class c
 
 ```ts
 @Command({
+  ...
   inject: [auth, user],
 })
 class LoginCommand {
@@ -111,7 +113,7 @@ class LoginCommand {
 }
 ```
 
-## Use Redux
+## Use with Redux
 
 You can manage state of objects using pure ReduxJS library. For this first of all, you should be configure the redux then pass the store to Piti.
 
@@ -195,10 +197,11 @@ const userReducer = (state = initialState, action) => {
 ```ts
 import { Command, Subscribe, dispatch, getState } from 'piti';
 
-@Command()
+@Command({
+  name: 'create-user [email]',
+  description: 'Create a new user'
+})
 class CreateUserCommand {
-  name = 'create-user [email]';
-  description = 'Create a new user';
   args = {};
 
   @Subscribe('FETCH_USER_FULFILLED')
@@ -224,7 +227,7 @@ class CreateUserCommand {
     dispatch(createUser(email));
   }
 
-  handle(args: Arguments) {
+  handler(args: Arguments) {
     this.args = args;
     dispatch(fetchUser(args.email));
   }
