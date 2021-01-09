@@ -48,7 +48,7 @@ Piti.run({
 });
 ```
 
-**Terminal**
+**Test**
 
 ```sh
 $ npx ts-node index.ts hello
@@ -89,7 +89,7 @@ class LoginCommand {
 export default LoginCommand;
 ```
 
-**Terminal**
+**Test**
 
 ```sh
 $ npx ts-node index.ts login --username test@example.com --password 1234
@@ -103,7 +103,9 @@ With the `@Command` decorator you can inject parameters into the command class c
 
 ```ts
 @Command({
-  ...
+  name: '...',
+  description: '...',
+  commands: [],
   inject: [auth, user],
 })
 class LoginCommand {
@@ -132,6 +134,7 @@ import { createStore } from 'redux';
 const store = createStore(reducers);
 
 Piti.run({
+  commands: [],
   scriptName: 'console-app',
   store,
 });
@@ -199,7 +202,7 @@ import { Command, Subscribe, dispatch, getState } from 'piti';
 
 @Command({
   name: 'create-user [email]',
-  description: 'Create a new user'
+  description: 'Create a new user',
 })
 class CreateUserCommand {
   args = {};
@@ -234,7 +237,7 @@ class CreateUserCommand {
 }
 ```
 
-**Terminal**
+**Test**
 
 ```sh
 $ npx ts-node index.ts create-user test@example.com
@@ -246,11 +249,11 @@ $ npx ts-node index.ts create-user test@example.com
 import { Subject, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-@Command()
+@Command({
+  name: 'fetch-users',
+  description: 'Fetch users and filter vip ones',
+})
 class CreateUserCommand {
-  name = 'fetch-users';
-  description = 'Fetch users and filter vip ones';
-
   @Subscribe({
     action: 'FETCH_USERS_FULFILLED',
     observer(subject: Subject<any>): Observable<any> {
