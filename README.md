@@ -1,19 +1,19 @@
 # Piti
 
-[![npm version](https://badge.fury.io/js/piti.svg)](https://badge.fury.io/js/piti)
+[![npm version](https://badge.fury.io/js/@pitijs/core.svg)](https://badge.fury.io/js/@pitijs/core)
 
 **Piti** is a small cli framework developed with Typescript. You can develop reactive applications by [Redux](https://redux.js.org/) and [RxJS](https://www.learnrxjs.io/) in Piti.
 
 **Install**
 
 ```sh
-$ yarn add piti
+$ yarn add @pitijs/core
 ```
 
 or
 
 ```sh
-$ npm i piti --save
+$ npm i @pitijs/core --save
 ```
 
 ## Quick Start

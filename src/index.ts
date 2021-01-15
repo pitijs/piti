@@ -4,8 +4,8 @@ import { CommandBuilder, CommandContainer } from './command';
 import { container, Redux } from './services';
 import { Options } from './utils/types';
 import { BUILDER_KEY, COMMAND_CONTAINER_KEY, SCRIPT_NAME, STORE_KEY, SUBSCRIBERS_KEY } from './config/constants';
-import * as internalExports from './exports';
 export type { ICommand } from './exports';
+export * from './exports';
 
 process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
   console.error(reason);
@@ -55,10 +55,5 @@ class Piti {
 }
 
 Piti.init();
-
-export const dispatch = internalExports.dispatch;
-export const getState = internalExports.getState;
-export const Subscribe = internalExports.Subscribe;
-export const Command = internalExports.Command;
 
 export default Piti;

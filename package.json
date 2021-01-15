@@ -1,6 +1,6 @@
 {
-  "name": "piti",
-  "version": "0.0.3-beta.3",
+  "name": "@pitijs/core",
+  "version": "0.0.1-beta.2",
   "description": "Piti is a small cli framework developed with typescript.",
   "main": "./dist/index.js",
   "scripts": {
