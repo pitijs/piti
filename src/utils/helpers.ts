@@ -9,12 +9,17 @@ export const createClass = (constructor: Function, args: any[]) => {
   return isPlainObject(result) ? result : newObject;
 };
 
-export const validateCommand = (command: ICommand) => {
-  if (!command.name) {
-    return red(`Missing command ${yellow('name')} property in command class.`);
-  } else if (!command.description) {
-    return red(`Missing command ${yellow('description')} property in command class.`);
-  } else if (!command.handle || !isFunction(command.handle)) {
-    return red(`Missing ${yellow('handle()')} method in command class`);
+export const defineProperty = (obj: Object, property: string | symbol, descriptor: Object): any => {
+  return Object.defineProperty(obj, property, {
+    enumerable: true,
+    configurable: false,
+    ...descriptor,
+  });
+};
+
+export const validateCommand = (command: ICommand, { name }: Function): string | null => {
+  if (!command.handler || !isFunction(command.handler)) {
+    return red(`Missing ${yellow('handler()')} method in ${name}`);
   }
+  return null;
 };

@@ -4,4 +4,5 @@ export const COMMANDS_KEY = 'fw.commands';
 export const COMMAND_BUILDER_KEY = 'fw.commandBuilder';
 export const BUILDER_KEY = 'fw.builder';
 export const STORE_KEY = 'fw.store';
-export const COMMANDS = 'fw.commands';
+export const BLUEPRINTS_KEY = 'fw.blueprints';
+export const COMMAND_CONTAINER_KEY = 'fw.commandContainer';

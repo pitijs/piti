@@ -1,70 +1,88 @@
-import yargs, { Argv } from 'yargs';
+import yargs, { Argv, BuilderCallback } from 'yargs';
 import isFunction from 'lodash.isfunction';
+import { List } from 'immutable';
 import ICommand from '../types/command';
-import { CommandObject, CommandType } from '../../utils/types';
+import { CommandObject, CommandClass } from '../../utils/types';
+import { CommandError, ValidationError } from '../../exceptions';
 import { createClass, validateCommand } from '../../utils/helpers';
 import { ServiceContainer } from '../../services';
-import { COMMANDS, COMMANDS_KEY, COMMAND_BUILDER_KEY, SCRIPT_NAME } from '../../config/constants';
+import {
+  BLUEPRINTS_KEY,
+  COMMAND_BUILDER_KEY,
+  COMMAND_CONTAINER_KEY,
+  SCRIPT_NAME,
+} from '../../config/constants';
 import { CommandBlueprint } from '../types';
+import { CommandContainer } from '..';
 
 class CommandBuilder {
-  constructor(public container: ServiceContainer) {}
+  private commandContainer: CommandContainer;
 
-  public add(command: CommandType): Argv {
-    const commandBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
-    let inject: [] = [];
-    const { command: _command, inject: _inject = [] } = command as CommandObject;
-    command = _command as any;
-    inject = _inject as [];
-
-    const CommandClass = command as any;
-    const commandInstance = createClass(CommandClass, inject) as ICommand;
-    const hasError = validateCommand(commandInstance);
-
-    if (hasError) throw new Error(hasError);
-
-    const { name: cmd, description, before, handle } = commandInstance;
-
-    this.saveBlueprint(cmd, description);
-
-    const commandBuilderHandler = (builder: Argv) => isFunction(before) && before(builder);
-    const commandHandler = (argv: Argv) => {
-      try {
-        handle.apply(commandInstance, [argv] as any);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    return commandBuilder.command(cmd, description, commandBuilderHandler, commandHandler);
+  constructor(public container: ServiceContainer) {
+    this.commandContainer = container.get<CommandContainer>(COMMAND_CONTAINER_KEY);
   }
 
-  public run() {
+  get yargsBuilder() {
+    return this.container.get<Argv>(COMMAND_BUILDER_KEY);
+  }
+
+  public add(commandObject: CommandObject, builder: Argv = this.yargsBuilder): Argv {
+    const { command, inject = [] } = commandObject;
+    const CommandClass = command as any;
+    const commandInstance = createClass(CommandClass, inject) as ICommand;
+    const { commandId } = CommandClass;
+    const { name: cmd, description } = commandObject;
+
+    this.saveBlueprint(commandId, cmd, description);
+
+    const builderHandler = this.builderHandler.bind(this, commandInstance, commandObject);
+    const commandHandler = this.commandHandler.bind(this, commandInstance, CommandClass);
+
+    return builder.command(
+      cmd,
+      description,
+      builderHandler as BuilderCallback<Object, any>,
+      commandHandler,
+    );
+  }
+
+  public builderHandler(commandInstance: ICommand, commandObject: CommandObject, builder: Argv) {
+    const { builder: builderHanler } = commandInstance;
+    if (isFunction(builderHanler)) builderHanler(builder);
+    const { subCommand = [] } = commandObject;
+    this.addCommands.call(this, subCommand, builder);
+  }
+
+  public commandHandler(commandInstance: ICommand, CommandClass: Function, argv: Argv) {
+    const error = validateCommand(commandInstance, CommandClass);
+    if (error) throw new ValidationError(error);
+    const { handler } = commandInstance;
+    handler.apply(commandInstance, [argv] as any);
+  }
+
+  public run(commands: CommandClass[]) {
     this.createScript();
-    this.addCommands();
-    this.container.add(COMMANDS, []);
-    const commandBuilder = this.container.get<Argv>(COMMAND_BUILDER_KEY);
-    commandBuilder.help().argv;
+    this.addCommands(commands);
+    this.yargsBuilder.help().argv;
   }
 
   public count(): number {
-    return this.getBlueprints().length;
+    return this.getBlueprints().size;
   }
 
-  public getBlueprints(): Array<CommandBlueprint> {
-    return this.container.get(COMMANDS, []);
+  public getBlueprints(): List<CommandBlueprint> {
+    return this.container.get(BLUEPRINTS_KEY, List([]));
   }
 
-  public saveBlueprint(name: string, description: string): void {
-    if (this.hasBlueprint(name)) return;
-    const blueprints = this.getBlueprints();
-    blueprints.push({ name, description });
-    this.container.add(COMMANDS, blueprints);
+  public saveBlueprint(commandId: string, name: string, description: string): void {
+    if (this.hasBlueprint(commandId)) return;
+    const newList = this.getBlueprints().push({ id: commandId, name, description });
+    this.container.add(BLUEPRINTS_KEY, newList);
   }
 
-  public hasBlueprint(name: string) {
-    const blueprints = this.getBlueprints();
-    return !!blueprints.find(({ name: cmd }) => cmd === name);
+  public hasBlueprint(commandId: string): boolean {
+    const index = this.getBlueprints().findIndex((blueprint) => blueprint.id === commandId);
+    return index > -1;
   }
 
   private createScript() {
@@ -73,11 +91,19 @@ class CommandBuilder {
     this.container.singleton(COMMAND_BUILDER_KEY, commandBuilder);
   }
 
-  private addCommands() {
-    const commands = this.container.get<CommandType[]>(COMMANDS_KEY, []);
+  private addCommands(commandClasses: CommandClass[] = [], builder = this.yargsBuilder) {
+    for (const commandClass of commandClasses) {
+      const { commandMeta } = commandClass as any;
 
-    for (const command of commands) {
-      this.add(command);
+      if (!commandMeta) {
+        throw new CommandError(`Missing the meta data in ${commandClass.name} command.`);
+      }
+
+      const commandObject = {
+        command: commandClass,
+        ...commandMeta,
+      };
+      this.add(commandObject, builder);
     }
   }
 }

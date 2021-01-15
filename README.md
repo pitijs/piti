@@ -1,19 +1,19 @@
 # Piti
 
-[![npm version](https://badge.fury.io/js/piti.svg)](https://badge.fury.io/js/piti)
+[![npm version](https://badge.fury.io/js/@pitijs/core.svg)](https://badge.fury.io/js/@pitijs/core)
 
 **Piti** is a small cli framework developed with Typescript. You can develop reactive applications by [Redux](https://redux.js.org/) and [RxJS](https://www.learnrxjs.io/) in Piti.
 
 **Install**
 
 ```sh
-$ yarn add piti
+$ yarn add @pitijs/core
 ```
 
 or
 
 ```sh
-$ npm i piti --save
+$ npm i @pitijs/core --save
 ```
 
 ## Quick Start
@@ -23,12 +23,12 @@ $ npm i piti --save
 ```ts
 import { Command } from 'piti';
 
-@Command()
+@Command({
+  name: 'hello',
+  description: 'The hello world command',
+})
 class HelloCommand {
-  name = 'hello';
-  description = 'The hello world command';
-
-  handle() {
+  handler() {
     console.log('Hello World!');
   }
 }
@@ -40,14 +40,15 @@ export default HelloCommand;
 
 ```ts
 import Piti from 'piti';
-import './hello';
+import HelloCommand from './hello';
 
 Piti.run({
   scriptName: 'console-app',
+  commands: [HelloCommand],
 });
 ```
 
-**Terminal**
+**Test**
 
 ```sh
 $ npx ts-node index.ts hello
@@ -63,12 +64,12 @@ Piti uses [yargs](http://yargs.js.org/) for command arguments. Created command b
 import { Command } from 'piti';
 import { Argv, Arguments } from 'yargs';
 
-@Command()
+@Command({
+  name: 'login',
+  description: 'Login to platform',
+})
 class LoginCommand {
-  name = 'login';
-  description = 'Loging to platformm';
-
-  before(builder: Argv) {
+  builder(yargs: Argv) {
     builder
       .positional('username', {
         type: 'string',
@@ -80,7 +81,7 @@ class LoginCommand {
       });
   }
 
-  handle(args: Arguments) {
+  handler(args: Arguments) {
     console.log('username:', args.username, 'password:', args.password);
   }
 }
@@ -88,7 +89,7 @@ class LoginCommand {
 export default LoginCommand;
 ```
 
-**Terminal**
+**Test**
 
 ```sh
 $ npx ts-node index.ts login --username test@example.com --password 1234
@@ -102,6 +103,9 @@ With the `@Command` decorator you can inject parameters into the command class c
 
 ```ts
 @Command({
+  name: '...',
+  description: '...',
+  commands: [],
   inject: [auth, user],
 })
 class LoginCommand {
@@ -111,7 +115,7 @@ class LoginCommand {
 }
 ```
 
-## Use Redux
+## Use with Redux
 
 You can manage state of objects using pure ReduxJS library. For this first of all, you should be configure the redux then pass the store to Piti.
 
@@ -130,6 +134,7 @@ import { createStore } from 'redux';
 const store = createStore(reducers);
 
 Piti.run({
+  commands: [],
   scriptName: 'console-app',
   store,
 });
@@ -195,10 +200,11 @@ const userReducer = (state = initialState, action) => {
 ```ts
 import { Command, Subscribe, dispatch, getState } from 'piti';
 
-@Command()
+@Command({
+  name: 'create-user [email]',
+  description: 'Create a new user',
+})
 class CreateUserCommand {
-  name = 'create-user [email]';
-  description = 'Create a new user';
   args = {};
 
   @Subscribe('FETCH_USER_FULFILLED')
@@ -224,14 +230,14 @@ class CreateUserCommand {
     dispatch(createUser(email));
   }
 
-  handle(args: Arguments) {
+  handler(args: Arguments) {
     this.args = args;
     dispatch(fetchUser(args.email));
   }
 }
 ```
 
-**Terminal**
+**Test**
 
 ```sh
 $ npx ts-node index.ts create-user test@example.com
@@ -243,11 +249,11 @@ $ npx ts-node index.ts create-user test@example.com
 import { Subject, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-@Command()
+@Command({
+  name: 'fetch-users',
+  description: 'Fetch users and filter vip ones',
+})
 class CreateUserCommand {
-  name = 'fetch-users';
-  description = 'Fetch users and filter vip ones';
-
   @Subscribe({
     action: 'FETCH_USERS_FULFILLED',
     observer(subject: Subject<any>): Observable<any> {
