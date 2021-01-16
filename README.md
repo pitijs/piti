@@ -1,6 +1,6 @@
 # Piti
 
-[![npm version](https://badge.fury.io/js/@pitijs/core.svg)](https://badge.fury.io/js/@pitijs/core)
+[![npm version](https://badge.fury.io/js/%40pitijs%2Fcore.svg)](https://badge.fury.io/js/%40pitijs%2Fcore)
 
 **Piti** is a small cli framework developed with Typescript. You can develop reactive applications by [Redux](https://redux.js.org/) and [RxJS](https://www.learnrxjs.io/) in Piti.
 
@@ -15,6 +15,14 @@ or
 ```sh
 $ npm i @pitijs/core --save
 ```
+
+You can also try Piti JS CLI to create piti projects and use some others paradigms.
+
+```bash
+npm i -g @pitijs/cli
+```
+
+More detail for [Piti CLI](https://github.com/pitijs/piti-cli)
 
 ## Quick Start
 
@@ -61,16 +69,11 @@ Piti uses [yargs](http://yargs.js.org/) for command arguments. Created command b
 **Example:**
 
 ```ts
-import { Command } from 'piti';
-import { Argv, Arguments } from 'yargs';
+import { Command, Argv, Arguments } from 'piti';
 
-@Command({
-  name: 'login',
-  description: 'Login to platform',
-})
 class LoginCommand {
   builder(yargs: Argv) {
-    builder
+    yargs
       .positional('username', {
         type: 'string',
         describe: 'The user name',
@@ -82,11 +85,9 @@ class LoginCommand {
   }
 
   handler(args: Arguments) {
-    console.log('username:', args.username, 'password:', args.password);
+    ...
   }
 }
-
-export default LoginCommand;
 ```
 
 **Test**
@@ -105,7 +106,6 @@ With the `@Command` decorator you can inject parameters into the command class c
 @Command({
   name: '...',
   description: '...',
-  commands: [],
   inject: [auth, user],
 })
 class LoginCommand {
